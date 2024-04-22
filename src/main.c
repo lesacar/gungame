@@ -1,3 +1,5 @@
+
+
 /*******************************************************************************************
 *
 *   raylib [core] example - 3d camera first person
@@ -23,9 +25,9 @@ int main(void)
 {
     // Initialization
     //--------------------------------------------------------------------------------------
-    const int screenWidth = 800;
-    const int screenHeight = 450;
-
+    const int screenWidth = GetScreenWidth();
+    const int screenHeight = GetScreenHeight();
+    SetConfigFlags(FLAG_FULLSCREEN_MODE|FLAG_MSAA_4X_HINT|FLAG_VSYNC_HINT);
     InitWindow(screenWidth, screenHeight, "raylib [core] example - 3d camera first person");
 
     // Define the camera to look into our 3d world (position, target, up vector)
@@ -116,12 +118,13 @@ int main(void)
         // Update camera computes movement internally depending on the camera mode
         // Some default standard keyboard/mouse inputs are hardcoded to simplify use
         // For advance camera controls, it's reecommended to compute camera movement manually
-        UpdateCamera(&camera, cameraMode);                  // Update camera
+        // UpdateCamera(&camera, cameraMode);                  // Update camera
 
 /*
         // Camera PRO usage example (EXPERIMENTAL)
         // This new camera function allows custom movement/rotation values to be directly provided
         // as input parameters, with this approach, rcamera module is internally independent of raylib inputs
+        */
         UpdateCameraPro(&camera,
             (Vector3){
                 (IsKeyDown(KEY_W) || IsKeyDown(KEY_UP))*0.1f -      // Move forward-backward
@@ -136,7 +139,6 @@ int main(void)
                 0.0f                                                // Rotation: roll
             },
             GetMouseWheelMove()*2.0f);                              // Move to target (zoom)
-*/
         //----------------------------------------------------------------------------------
 
         // Draw
@@ -196,6 +198,7 @@ int main(void)
         EndDrawing();
         //----------------------------------------------------------------------------------
     }
+    EnableCursor();
 
     // De-Initialization
     //--------------------------------------------------------------------------------------
