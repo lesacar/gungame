@@ -68,6 +68,8 @@
     #define CAMERA_CULL_DISTANCE_NEAR      0.01
     #define CAMERA_CULL_DISTANCE_FAR    1000.0
 #else
+    #define RL_CULL_DISTANCE_NEAR              0.01    // Default projection matrix near cull distance
+    #define RL_CULL_DISTANCE_FAR             1000.0    // Default projection matrix far cull distance
     #define CAMERA_CULL_DISTANCE_NEAR   RL_CULL_DISTANCE_NEAR
     #define CAMERA_CULL_DISTANCE_FAR    RL_CULL_DISTANCE_FAR
 #endif

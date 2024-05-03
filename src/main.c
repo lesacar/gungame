@@ -1,4 +1,5 @@
 #include "raylib.h"
+#define RCAMERA_IMPLEMENTATION
 #include "rcamera.h"
 
 #define MAX_COLUMNS 20

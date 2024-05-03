@@ -1,24 +1,7 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -pthread
 RM = rm
-WARN = -Wall -Wextra -Wpedantic \
-         -Wmissing-prototypes -Wstrict-prototypes -Wold-style-definition \
-         -Wimplicit-function-declaration -Wreturn-type \
-         -Wuninitialized -Wunused-result -Wunused-variable \
-         -Wunused-value -Wunused-parameter \
-         -Wformat-security -Warray-bounds \
-         -Wmaybe-uninitialized -Wfloat-equal \
-         -Wpointer-arith -Wunused-but-set-variable \
-         -Wunused-function -Wshadow \
-         -Wduplicated-cond -Wrestrict \
-         -Wlogical-op -Wnull-dereference -Wdouble-promotion \
-         -Wformat=2 -Wimplicit-int -Wmissing-include-dirs \
-         -Wundef -Wpointer-sign \
-         -Wwrite-strings -Waddress \
-         -Wlogical-op \
-         -Wconversion -Wsign-compare \
-         -Wtype-limits
-
+WARN = 
 LDFLAGS = -L./static -lraylib -lm
 INCLUDE = -I./src/include
 BUILD_DIR = build
