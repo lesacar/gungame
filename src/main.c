@@ -130,6 +130,7 @@ void Game(Camera *camera, float heights[MAX_COLUMNS], Vector3 positions[MAX_COLU
     DrawText("- Camera mode keys: 1, 2, 3, 4", 15, 60, 10, BLACK);
     DrawText("- Zoom keys: num-plus, num-minus or mouse scroll", 15, 75, 10, BLACK);
     DrawText("- Camera projection key: P", 15, 90, 10, BLACK);
+    DrawText(TextFormat("%d", GetFPS()), 15, 110, 20, BLACK);
 
     DrawRectangle(600, 5, 195, 100, Fade(SKYBLUE, 0.5f));
     DrawRectangleLines(600, 5, 195, 100, BLUE);

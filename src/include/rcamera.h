@@ -42,6 +42,8 @@
 #ifndef RCAMERA_H
 #define RCAMERA_H
 
+#include <stdio.h>
+
 //----------------------------------------------------------------------------------
 // Defines and Macros
 //----------------------------------------------------------------------------------
@@ -539,6 +541,8 @@ void UpdateCameraPro(Camera *camera, Vector3 movement, Vector3 rotation, float z
     CameraPitch(camera, -rotation.y*DEG2RAD, lockView, rotateAroundTarget, rotateUp);
     CameraYaw(camera, -rotation.x*DEG2RAD, rotateAroundTarget);
     CameraRoll(camera, rotation.z*DEG2RAD);
+    if (IsKeyDown(KEY_Q)) { printf("O"); }
+    if (IsKeyDown(KEY_E)) { printf(" "); }
 
     // Camera movement
     CameraMoveForward(camera, movement.x, moveInWorldPlane);
