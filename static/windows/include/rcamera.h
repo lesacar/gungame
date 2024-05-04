@@ -68,8 +68,10 @@
     #define CAMERA_CULL_DISTANCE_NEAR      0.01
     #define CAMERA_CULL_DISTANCE_FAR    1000.0
 #else
-    #define CAMERA_CULL_DISTANCE_NEAR   RL_CULL_DISTANCE_NEAR
-    #define CAMERA_CULL_DISTANCE_FAR    RL_CULL_DISTANCE_FAR
+    #define RL_CULL_DISTANCE_NEAR                  // Default projection matrix near cull distance
+    #define RL_CULL_DISTANCE_FAR                 // Default projection matrix far cull distance
+    #define CAMERA_CULL_DISTANCE_NEAR   0.01
+    #define CAMERA_CULL_DISTANCE_FAR    1000.0
 #endif
 
 //----------------------------------------------------------------------------------
@@ -459,8 +461,9 @@ void UpdateCamera(Camera *camera, int mode)
         if (IsKeyDown(KEY_UP)) CameraPitch(camera, CAMERA_ROTATION_SPEED, lockView, rotateAroundTarget, rotateUp);
         if (IsKeyDown(KEY_RIGHT)) CameraYaw(camera, -CAMERA_ROTATION_SPEED, rotateAroundTarget);
         if (IsKeyDown(KEY_LEFT)) CameraYaw(camera, CAMERA_ROTATION_SPEED, rotateAroundTarget);
-        if (IsKeyDown(KEY_Q)) CameraRoll(camera, -CAMERA_ROTATION_SPEED);
-        if (IsKeyDown(KEY_E)) CameraRoll(camera, CAMERA_ROTATION_SPEED);
+
+         
+        
 
         // Camera movement
         // Camera pan (for CAMERA_FREE)

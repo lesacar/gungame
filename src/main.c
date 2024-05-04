@@ -164,6 +164,7 @@ int main(void)
 	const int screenHeight = 768;
     SetConfigFlags(FLAG_MSAA_4X_HINT);
     InitWindow(screenWidth, screenHeight, "raylib [core] example - 3d camera first person");
+    SetExitKey(KEY_NULL);
     // Define the camera to look into our 3d world (position, target, up vector)
     Camera camera = { 0 };
     camera.position = (Vector3){ 0.0f, 2.0f, 4.0f };    // Camera position
