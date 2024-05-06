@@ -266,8 +266,24 @@ void CameraMoveForward(Camera *camera, float distance, bool moveInWorldPlane)
     forward = Vector3Scale(forward, distance);
 
     // Move position and target
-    camera->position = Vector3Add(camera->position, forward);
-    camera->target = Vector3Add(camera->target, forward);
+    if (IsKeyDown(KEY_LEFT_CONTROL))
+    {
+        forward.x = forward.x / 3.0f;
+        forward.y = forward.y / 3.0f;
+        forward.z = forward.z / 3.0f;
+        camera->position = Vector3Add(camera->position, forward);
+        camera->target = Vector3Add(camera->target, forward);
+    } else if (IsKeyDown(KEY_LEFT_SHIFT))
+    {   
+        forward.x = forward.x * 1.5f;
+        forward.y = forward.y * 1.5f;
+        forward.z = forward.z * 1.5f;
+        camera->position = Vector3Add(camera->position, forward);
+        camera->target = Vector3Add(camera->target, forward);
+    } else {
+        camera->position = Vector3Add(camera->position, forward);
+        camera->target = Vector3Add(camera->target, forward);
+    }
 }
 
 // Moves the camera in its up direction
@@ -299,8 +315,28 @@ void CameraMoveRight(Camera *camera, float distance, bool moveInWorldPlane)
     right = Vector3Scale(right, distance);
 
     // Move position and target
-    camera->position = Vector3Add(camera->position, right);
-    camera->target = Vector3Add(camera->target, right);
+    
+
+
+    if (IsKeyDown(KEY_LEFT_CONTROL))
+    {
+        right.x = right.x / 3.0f;
+        right.y = right.y / 3.0f;
+        right.z = right.z / 3.0f;
+        camera->position = Vector3Add(camera->position, right);
+        camera->target = Vector3Add(camera->target, right);
+    } else if (IsKeyDown(KEY_LEFT_SHIFT))
+    {   
+        right.x = right.x * 1.5f;
+        right.y = right.y * 1.5f;
+        right.z = right.z * 1.5f;
+        camera->position = Vector3Add(camera->position, right);
+        camera->target = Vector3Add(camera->target, right);
+    } else {
+        camera->position = Vector3Add(camera->position, right);
+        camera->target = Vector3Add(camera->target, right);
+    }
+
 }
 
 // Moves the camera position closer/farther to/from the camera target
@@ -485,10 +521,12 @@ void UpdateCamera(Camera *camera, int mode)
         }
 
         // Keyboard support
-        if (IsKeyDown(KEY_W)) CameraMoveForward(camera, CAMERA_MOVE_SPEED, moveInWorldPlane);
-        if (IsKeyDown(KEY_A)) CameraMoveRight(camera, -CAMERA_MOVE_SPEED, moveInWorldPlane);
-        if (IsKeyDown(KEY_S)) CameraMoveForward(camera, -CAMERA_MOVE_SPEED, moveInWorldPlane);
-        if (IsKeyDown(KEY_D)) CameraMoveRight(camera, CAMERA_MOVE_SPEED, moveInWorldPlane);
+        
+            if (IsKeyDown(KEY_W)) CameraMoveForward(camera, CAMERA_MOVE_SPEED, moveInWorldPlane);
+            if (IsKeyDown(KEY_A)) CameraMoveRight(camera, -CAMERA_MOVE_SPEED, moveInWorldPlane);
+            if (IsKeyDown(KEY_S)) CameraMoveForward(camera, -CAMERA_MOVE_SPEED, moveInWorldPlane);
+            if (IsKeyDown(KEY_D)) CameraMoveRight(camera, CAMERA_MOVE_SPEED, moveInWorldPlane);
+        
 
         // Gamepad movement
         if (IsGamepadAvailable(0))
@@ -541,8 +579,6 @@ void UpdateCameraPro(Camera *camera, Vector3 movement, Vector3 rotation, float z
     CameraPitch(camera, -rotation.y*DEG2RAD, lockView, rotateAroundTarget, rotateUp);
     CameraYaw(camera, -rotation.x*DEG2RAD, rotateAroundTarget);
     CameraRoll(camera, rotation.z*DEG2RAD);
-    if (IsKeyDown(KEY_Q)) { printf("O"); }
-    if (IsKeyDown(KEY_E)) { printf(" "); }
 
     // Camera movement
     CameraMoveForward(camera, movement.x, moveInWorldPlane);

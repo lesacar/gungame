@@ -1,11 +1,15 @@
+#include <stdlib.h>
 #include "raylib.h"
 #define RCAMERA_IMPLEMENTATION
 #include "rcamera.h"
 
-#define MAX_COLUMNS 20
 
-void Game(Camera *camera, float heights[MAX_COLUMNS], Vector3 positions[MAX_COLUMNS], Color colors[MAX_COLUMNS], int *cameraMode)
+#define MAX_COLUMNS 12
+
+void Game(Camera *camera, float heights[MAX_COLUMNS], Vector3 positions[MAX_COLUMNS], Color colors[MAX_COLUMNS], int *cameraMode,
+    Texture2D *ye, Mesh mesh, Model model, Color* mapPixels)
 {
+
     // Define the target update rate for the camera (60 times per second)
     const double targetUpdateRate = 1.0 / 60.0;
     static double timeAccumulator = 0.0;
@@ -18,59 +22,7 @@ void Game(Camera *camera, float heights[MAX_COLUMNS], Vector3 positions[MAX_COLU
     {
         // Reset the time accumulator
         timeAccumulator -= targetUpdateRate;
-
-        if (IsKeyPressed(KEY_ONE))
-        {
-            *cameraMode = CAMERA_FREE;
-            camera->up = (Vector3){ 0.0f, 1.0f, 0.0f }; // Reset roll
-        }
-
-        if (IsKeyPressed(KEY_TWO))
-        {
-            *cameraMode = CAMERA_FIRST_PERSON;
-            camera->up = (Vector3){ 0.0f, 1.0f, 0.0f }; // Reset roll
-        }
-
-        if (IsKeyPressed(KEY_THREE))
-        {
-            *cameraMode = CAMERA_THIRD_PERSON;
-            camera->up = (Vector3){ 0.0f, 1.0f, 0.0f }; // Reset roll
-        }
-
-        if (IsKeyPressed(KEY_FOUR))
-        {
-            *cameraMode = CAMERA_ORBITAL;
-            camera->up = (Vector3){ 0.0f, 1.0f, 0.0f }; // Reset roll
-        }
-
-        // Switch camera projection
-        if (IsKeyPressed(KEY_P))
-        {
-            if (camera->projection == CAMERA_PERSPECTIVE)
-            {
-                // Create isometric view
-                *cameraMode = CAMERA_THIRD_PERSON;
-                // Note: The target distance is related to the render distance in the orthographic projection
-                camera->position = (Vector3){ 0.0f, 2.0f, -100.0f };
-                camera->target = (Vector3){ 0.0f, 2.0f, 0.0f };
-                camera->up = (Vector3){ 0.0f, 1.0f, 0.0f };
-                camera->projection = CAMERA_ORTHOGRAPHIC;
-                camera->fovy = 20.0f; // near plane width in CAMERA_ORTHOGRAPHIC
-                CameraYaw(camera, -135 * DEG2RAD, true);
-                CameraPitch(camera, -45 * DEG2RAD, true, true, false);
-            }
-            else if (camera->projection == CAMERA_ORTHOGRAPHIC)
-            {
-                // Reset to default view
-                *cameraMode = CAMERA_THIRD_PERSON;
-                camera->position = (Vector3){ 0.0f, 2.0f, 10.0f };
-                camera->target = (Vector3){ 0.0f, 2.0f, 0.0f };
-                camera->up = (Vector3){ 0.0f, 1.0f, 0.0f };
-                camera->projection = CAMERA_PERSPECTIVE;
-                camera->fovy = 60.0f;
-            }
-        }
-
+        
         UpdateCameraPro(camera,
             (Vector3){
                 (IsKeyDown(KEY_W) || IsKeyDown(KEY_UP)) * 0.1f -      // Move forward-backward
@@ -104,11 +56,23 @@ void Game(Camera *camera, float heights[MAX_COLUMNS], Vector3 positions[MAX_COLU
     DrawCube((Vector3){ 16.0f, 2.5f, 0.0f }, 1.0f, 5.0f, 32.0f, LIME);      // Draw a green wall
     DrawCube((Vector3){ 0.0f, 2.5f, 16.0f }, 32.0f, 5.0f, 1.0f, GOLD);      // Draw a yellow wall
 
-    // Draw some cubes around
+    ///////////////////////////
+
+DrawTexturePro(*ye,
+    (Rectangle){ 0.0f, 0.0f, ye->width, ye->height }, // source rectangle
+    (Rectangle){ 2.0f, 2.0f, -ye->width / 25.0f, ye->height / 25.0f }, // destination rectangle scaled down by 100x
+    (Vector2){ ye->width / 200.0f, ye->height / 200.0f }, // origin
+    0.0f, // rotation angle
+    WHITE // tint
+);
+
+
+    //////////////////////////
+
     for (int i = 0; i < MAX_COLUMNS; i++)
     {
         DrawCube(positions[i], 2.0f, heights[i], 2.0f, colors[i]);
-        DrawCubeWires(positions[i], 2.0f, heights[i], 2.0f, MAROON);
+        // DrawCubeWires(positions[i], 2.0f, heights[i], 2.0f, MAROON);
     }
 
     // Draw player cube
@@ -130,7 +94,7 @@ void Game(Camera *camera, float heights[MAX_COLUMNS], Vector3 positions[MAX_COLU
     DrawText("- Camera mode keys: 1, 2, 3, 4", 15, 60, 10, BLACK);
     DrawText("- Zoom keys: num-plus, num-minus or mouse scroll", 15, 75, 10, BLACK);
     DrawText("- Camera projection key: P", 15, 90, 10, BLACK);
-    DrawText(TextFormat("%d", GetFPS()), 15, 110, 20, BLACK);
+    DrawText(TextFormat("%d FPS", GetFPS()), 15, 110, 32, BLACK);
 
     DrawRectangle(600, 5, 195, 100, Fade(SKYBLUE, 0.5f));
     DrawRectangleLines(600, 5, 195, 100, BLUE);
@@ -161,17 +125,34 @@ int main(void)
 {
     // Initialization
     //--------------------------------------------------------------------------------------
-    const int screenWidth = 1366;
-	const int screenHeight = 768;
-    SetConfigFlags(FLAG_MSAA_4X_HINT);
+    int screenWidth = 1366;
+	int screenHeight = 768;
+    SetConfigFlags(FLAG_MSAA_4X_HINT|FLAG_WINDOW_UNDECORATED);
+    
     InitWindow(screenWidth, screenHeight, "raylib [core] example - 3d camera first person");
     SetExitKey(KEY_NULL);
+
+    Image yeImg = LoadImage("ye.png");
+    if (!IsImageReady(yeImg))
+    {
+        printf("YE ERROR 111;");
+        exit(0);
+    }
+    ImageFlipVertical(&yeImg);
+    
+    Texture2D ye = LoadTextureFromImage(yeImg);
+    SetTextureFilter(ye, TEXTURE_FILTER_TRILINEAR);
+    Mesh mesh = GenMeshCubicmap(yeImg, (Vector3){ 1.0f, 1.0f, 1.0f });
+    Model model = LoadModelFromMesh(mesh);
+    Color *mapPixels = LoadImageColors(yeImg);
+    UnloadImage(yeImg);
+
     // Define the camera to look into our 3d world (position, target, up vector)
     Camera camera = { 0 };
     camera.position = (Vector3){ 0.0f, 2.0f, 4.0f };    // Camera position
     camera.target = (Vector3){ 0.0f, 2.0f, 0.0f };      // Camera looking at point
     camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };          // Camera up vector (rotation towards target)
-    camera.fovy = 60.0f;                                // Camera field-of-view Y
+    camera.fovy = 90.0f;                                // Camera field-of-view Y
     camera.projection = CAMERA_PERSPECTIVE;             // Camera projection type
 
     int cameraMode = CAMERA_FIRST_PERSON;
@@ -184,8 +165,8 @@ int main(void)
     for (int i = 0; i < MAX_COLUMNS; i++)
     {
         heights[i] = (float)GetRandomValue(1, 12);
-        positions[i] = (Vector3){ (float)GetRandomValue(-15, 15), heights[i]/2.0f, (float)GetRandomValue(-15, 15) };
-        colors[i] = (Color){ GetRandomValue(20, 255), GetRandomValue(10, 55), 30, 255 };
+        positions[i] = (Vector3){ (float)-14+i*2, heights[i]/2.0f, (float)-10 };
+        colors[i] = (Color){ GetRandomValue(0, 255), GetRandomValue(0, 255), GetRandomValue(0,255), GetRandomValue(0,255) };
     }
 
     DisableCursor();                    // Limit cursor to relative movement inside the window
@@ -194,13 +175,28 @@ int main(void)
     //--------------------------------------------------------------------------------------
 
     // Main game loop
-    while (!WindowShouldClose())        // Detect window close button or ESC key
+    bool exitWindow = false;
+    bool bl = false;
+    while (!exitWindow)
     {
-        // Update
-        Game(&camera, heights, positions, colors, &cameraMode);
-        //----------------------------------------------------------------------------------
-        // Switch camera mode
+        if (IsKeyPressed(KEY_F11))
+ 		{
+            if (!bl)
+            {
+                // SetWindowSize(GetMonitorWidth(GetCurrentMonitor()),GetMonitorHeight(GetCurrentMonitor()));
+                SetWindowSize(GetMonitorWidth(GetCurrentMonitor())-1, GetMonitorHeight(GetCurrentMonitor())-1);
+                SetWindowPosition(0,0);
+                bl = !bl;
+            } else {
+                SetWindowSize(screenWidth, screenHeight);
+                bl = !bl;
+            }
+            
+ 			
 
+ 		}
+        Game(&camera, heights, positions, colors, &cameraMode, &ye, mesh, model, mapPixels);
+        if ((IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_Q)) || WindowShouldClose()) exitWindow = true;
     }
     EnableCursor();
 

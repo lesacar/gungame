@@ -485,10 +485,20 @@ void UpdateCamera(Camera *camera, int mode)
         }
 
         // Keyboard support
-        if (IsKeyDown(KEY_W)) CameraMoveForward(camera, CAMERA_MOVE_SPEED, moveInWorldPlane);
-        if (IsKeyDown(KEY_A)) CameraMoveRight(camera, -CAMERA_MOVE_SPEED, moveInWorldPlane);
-        if (IsKeyDown(KEY_S)) CameraMoveForward(camera, -CAMERA_MOVE_SPEED, moveInWorldPlane);
-        if (IsKeyDown(KEY_D)) CameraMoveRight(camera, CAMERA_MOVE_SPEED, moveInWorldPlane);
+        
+        if (IsKeyDown(KEY_LEFT_SHIFT))
+        {
+            if (IsKeyDown(KEY_W)) CameraMoveForward(camera, CAMERA_MOVE_SPEED/3, moveInWorldPlane);
+            if (IsKeyDown(KEY_A)) CameraMoveRight(camera, -CAMERA_MOVE_SPEED/3, moveInWorldPlane);
+            if (IsKeyDown(KEY_S)) CameraMoveForward(camera, -CAMERA_MOVE_SPEED/3, moveInWorldPlane);
+            if (IsKeyDown(KEY_D)) CameraMoveRight(camera, CAMERA_MOVE_SPEED/3, moveInWorldPlane);
+        } else {
+            if (IsKeyDown(KEY_W)) CameraMoveForward(camera, CAMERA_MOVE_SPEED, moveInWorldPlane);
+            if (IsKeyDown(KEY_A)) CameraMoveRight(camera, -CAMERA_MOVE_SPEED, moveInWorldPlane);
+            if (IsKeyDown(KEY_S)) CameraMoveForward(camera, -CAMERA_MOVE_SPEED, moveInWorldPlane);
+            if (IsKeyDown(KEY_D)) CameraMoveRight(camera, CAMERA_MOVE_SPEED, moveInWorldPlane);
+        }
+        
 
         // Gamepad movement
         if (IsGamepadAvailable(0))
@@ -541,8 +551,6 @@ void UpdateCameraPro(Camera *camera, Vector3 movement, Vector3 rotation, float z
     CameraPitch(camera, -rotation.y*DEG2RAD, lockView, rotateAroundTarget, rotateUp);
     CameraYaw(camera, -rotation.x*DEG2RAD, rotateAroundTarget);
     CameraRoll(camera, rotation.z*DEG2RAD);
-    if (IsKeyDown(KEY_Q)) { printf("O"); }
-    if (IsKeyDown(KEY_E)) { printf(" "); }
 
     // Camera movement
     CameraMoveForward(camera, movement.x, moveInWorldPlane);
