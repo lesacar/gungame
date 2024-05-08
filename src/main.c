@@ -2,9 +2,45 @@
 #include "raylib.h"
 #define RCAMERA_IMPLEMENTATION
 #include "rcamera.h"
+#include <stdbool.h>
+#include <stdint.h>
+
+typedef struct
+{
+    bool paused;
+    bool borderless;
+    bool exitWindow;
+} L_KEYPRESSES;
+
+typedef struct {
+    int32_t width;
+    int32_t height;
+} W_info; // Window width and height
 
 
 #define MAX_COLUMNS 12
+
+void custom_keypress_controls(L_KEYPRESSES *lkeys, W_info *w_info) // handles inputs for fullscreen toggle, pause menu, window exit, etc...
+{
+    if (IsKeyPressed(KEY_ESCAPE))
+        {
+            lkeys->paused = !lkeys->paused;
+        }
+        
+        if (IsKeyPressed(KEY_F11))
+ 		{
+            if (!lkeys->borderless)
+            {
+                // SetWindowSize(GetMonitorWidth(GetCurrentMonitor()),GetMonitorHeight(GetCurrentMonitor()));
+                SetWindowSize(GetMonitorWidth(GetCurrentMonitor())-1, GetMonitorHeight(GetCurrentMonitor())-1);
+                SetWindowPosition(0,0);
+                lkeys->borderless = !lkeys->borderless;
+            } else {
+                SetWindowSize(w_info->width, w_info->height);
+                lkeys->borderless = !lkeys->borderless;
+            }
+ 		}
+}
 
 void Game(Camera *camera, float heights[MAX_COLUMNS], Vector3 positions[MAX_COLUMNS], Color colors[MAX_COLUMNS], int *cameraMode,
     Texture2D *ye, Mesh mesh, Model model, Color* mapPixels)
@@ -123,15 +159,19 @@ DrawTexturePro(*ye,
 //------------------------------------------------------------------------------------
 int main(void)
 {
-    // Initialization
-    //--------------------------------------------------------------------------------------
-    int screenWidth = 1366;
-	int screenHeight = 768;
+    W_info w_info = {
+        .width = 1366,
+        .height = 768
+    };
     SetConfigFlags(FLAG_MSAA_4X_HINT|FLAG_WINDOW_UNDECORATED);
     
-    InitWindow(screenWidth, screenHeight, "raylib [core] example - 3d camera first person");
+    InitWindow(w_info.width,w_info.height, "OpenGL Window");
     SetExitKey(KEY_NULL);
-
+    L_KEYPRESSES lkeys = {
+        .exitWindow = false,
+        .borderless = false,
+        .paused = false
+    }; // struct with all values for handling custom window events
     Image yeImg = LoadImage("ye.png");
     if (!IsImageReady(yeImg))
     {
@@ -175,28 +215,19 @@ int main(void)
     //--------------------------------------------------------------------------------------
 
     // Main game loop
-    bool exitWindow = false;
-    bool bl = false;
-    while (!exitWindow)
+    while (!lkeys.exitWindow)
     {
-        if (IsKeyPressed(KEY_F11))
- 		{
-            if (!bl)
-            {
-                // SetWindowSize(GetMonitorWidth(GetCurrentMonitor()),GetMonitorHeight(GetCurrentMonitor()));
-                SetWindowSize(GetMonitorWidth(GetCurrentMonitor())-1, GetMonitorHeight(GetCurrentMonitor())-1);
-                SetWindowPosition(0,0);
-                bl = !bl;
-            } else {
-                SetWindowSize(screenWidth, screenHeight);
-                bl = !bl;
-            }
-            
- 			
-
- 		}
-        Game(&camera, heights, positions, colors, &cameraMode, &ye, mesh, model, mapPixels);
-        if ((IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_Q)) || WindowShouldClose()) exitWindow = true;
+        custom_keypress_controls(&lkeys, &w_info);
+        if (!lkeys.paused) {
+            Game(&camera, heights, positions, colors, &cameraMode, &ye, mesh, model, mapPixels);
+        } 
+        if (lkeys.paused) {
+            BeginDrawing();
+            EndDrawing();
+        }
+        
+        if ((IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_Q)) || WindowShouldClose()) lkeys.exitWindow = true;
+        
     }
     EnableCursor();
 
