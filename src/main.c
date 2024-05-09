@@ -140,9 +140,11 @@ void Game(Camera *camera, DevConsole *cons, L_KEYPRESSES *lkeys, int *cameraMode
 
     if (lkeys->devconsole)
     {
-        DrawRectangle(4,GetScreenHeight()-4-24, 400, 24, SKYBLUE);
-        DrawRectangleLines(3,GetScreenHeight()-5-24, 402, 26, BLACK);
-        DrawText(TextFormat("%s", cons->text), 6, GetScreenHeight()-3-22, 22, RED);
+        DrawRectangle(4,GetScreenHeight()-4-24, 400, 24, (Color){0,0,0,200});
+        // DrawRectangleLines(3,GetScreenHeight()-5-24, 402, 25, BLACK);
+		float conslinewidth = 5.0f;
+		DrawRectangleLinesEx((Rectangle){3+(-1*(int)conslinewidth+1),GetScreenHeight()-5-24+(-1*(int)conslinewidth+1), 402+((int)conslinewidth), 25+((int)conslinewidth)}, conslinewidth, BLACK);
+        DrawText(TextFormat("%s", cons->text), 6, GetScreenHeight()-3-22, 22, WHITE);
         int key = GetKeyPressed();
         if (key > 0 && cons->index < 63 && cons->index >= 0)
         {
@@ -194,8 +196,7 @@ void Game(Camera *camera, DevConsole *cons, L_KEYPRESSES *lkeys, int *cameraMode
                 GetMouseDelta().x * 0.05f,                            // Rotation: yaw
                 GetMouseDelta().y * 0.05f,                            // Rotation: pitch
                 0.0f                                                // Rotation: roll
-            },
-            GetMouseWheelMove() * 2.0f);  
+            },0);  
 
     // Draw
     //----------------------------------------------------------------------------------
@@ -203,6 +204,8 @@ void Game(Camera *camera, DevConsole *cons, L_KEYPRESSES *lkeys, int *cameraMode
     // Draw info boxes
     DrawRectangle(5, 5, 330, 100, Fade(SKYBLUE, 0.5f));
     DrawRectangleLines(5, 5, 330, 100, BLUE);
+	DrawCircle(GetScreenWidth()/2,GetScreenHeight()/2,5.0f,YELLOW);
+	DrawCircle(GetScreenWidth()/2,GetScreenHeight()/2,1.0f,BLACK);
 
     DrawText("Camera controls:", 15, 15, 10, BLACK);
     DrawText("- Move keys: W, A, S, D, Space, Left-Ctrl", 15, 30, 10, BLACK);
@@ -296,7 +299,7 @@ int main(void)
     DisableCursor();
     lkeys.cursorEnabled = false;
 
-    SetTargetFPS(0);
+    SetTargetFPS(60);
 
     // Main game loop
     while (!lkeys.exitWindow)
@@ -308,7 +311,6 @@ int main(void)
         if (lkeys.paused) {
             pauseMenu(&camera, &lkeys, &ye, positions, colors, heights, &cameraMode);
         }
-        
         if ((IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_Q)) || WindowShouldClose()) lkeys.exitWindow = true;
         
     }
