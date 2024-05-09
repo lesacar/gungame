@@ -4,87 +4,52 @@
 #include "rcamera.h"
 #include <stdbool.h>
 #include <stdint.h>
+#include <string.h>
+
+#define MAX_COLUMNS 12
+
+// struct with all values for handling custom window events
+
+typedef struct
+{
+    char text[256];
+    int32_t index;
+} DevConsole;
 
 typedef struct
 {
     bool paused;
     bool borderless;
     bool exitWindow;
+    bool cursorEnabled;
+    bool devconsole;
 } L_KEYPRESSES;
 
+// struct with window width and height
 typedef struct {
     int32_t width;
     int32_t height;
-} W_info; // Window width and height
+} W_info; 
 
+void render_3d(Camera *camera, Texture2D *ye, Vector3 positions[MAX_COLUMNS], Color colors[MAX_COLUMNS], float heights[MAX_COLUMNS], int *cameraMode);
 
-#define MAX_COLUMNS 12
-
-void custom_keypress_controls(L_KEYPRESSES *lkeys, W_info *w_info) // handles inputs for fullscreen toggle, pause menu, window exit, etc...
-{
-    if (IsKeyPressed(KEY_ESCAPE))
-        {
-            lkeys->paused = !lkeys->paused;
-        }
-        
-        if (IsKeyPressed(KEY_F11))
- 		{
-            if (!lkeys->borderless)
-            {
-                // SetWindowSize(GetMonitorWidth(GetCurrentMonitor()),GetMonitorHeight(GetCurrentMonitor()));
-                SetWindowSize(GetMonitorWidth(GetCurrentMonitor())-1, GetMonitorHeight(GetCurrentMonitor())-1);
-                SetWindowPosition(0,0);
-                lkeys->borderless = !lkeys->borderless;
-            } else {
-                SetWindowSize(w_info->width, w_info->height);
-                lkeys->borderless = !lkeys->borderless;
-            }
- 		}
+void pauseMenu(Camera *camera, L_KEYPRESSES *lkeys, Texture2D *ye, Vector3 positions[MAX_COLUMNS], Color colors[MAX_COLUMNS], float heights[MAX_COLUMNS], int *cameraMode) {
+    if (!lkeys->cursorEnabled)
+    {
+        EnableCursor();
+        lkeys->cursorEnabled = true;
+    }
+    
+    BeginDrawing();
+    ClearBackground(WHITE);
+    render_3d(camera, ye, positions, colors, heights, cameraMode);
+    DrawRectangle(GetScreenWidth()/2-100, GetScreenHeight()/2-100, 200, 200, WHITE );
+    DrawText("Paused", 5, GetScreenHeight() - 25, 20, BLACK);
+    EndDrawing();
 }
 
-void Game(Camera *camera, float heights[MAX_COLUMNS], Vector3 positions[MAX_COLUMNS], Color colors[MAX_COLUMNS], int *cameraMode,
-    Texture2D *ye, Mesh mesh, Model model, Color* mapPixels)
-{
-
-    // Define the target update rate for the camera (60 times per second)
-    const double targetUpdateRate = 1.0 / 60.0;
-    static double timeAccumulator = 0.0;
-
-    // Accumulate time
-    timeAccumulator += GetFrameTime();
-
-    // Check if it's time to update the camera
-    while (timeAccumulator >= targetUpdateRate)
-    {
-        // Reset the time accumulator
-        timeAccumulator -= targetUpdateRate;
-        
-        UpdateCameraPro(camera,
-            (Vector3){
-                (IsKeyDown(KEY_W) || IsKeyDown(KEY_UP)) * 0.1f -      // Move forward-backward
-                (IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN)) * 0.1f,
-                (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) * 0.1f -   // Move right-left
-                (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT)) * 0.1f,
-                0.0f                                                // Move up-down
-            },
-            (Vector3){0},
-            0);                              // Move to target (zoom)
-    }
-    UpdateCameraPro(camera,
-            (Vector3){0},
-            (Vector3){
-                GetMouseDelta().x * 0.05f,                            // Rotation: yaw
-                GetMouseDelta().y * 0.05f,                            // Rotation: pitch
-                0.0f                                                // Rotation: roll
-            },
-            GetMouseWheelMove() * 2.0f);  
-
-    // Draw
-    //----------------------------------------------------------------------------------
-    BeginDrawing();
-
-    ClearBackground(RAYWHITE);
-
+void render_3d(Camera *camera, Texture2D *ye, Vector3 positions[MAX_COLUMNS], Color colors[MAX_COLUMNS], float heights[MAX_COLUMNS], int *cameraMode) {
+    
     BeginMode3D(*camera);
 
     DrawPlane((Vector3){ 0.0f, 0.0f, 0.0f }, (Vector2){ 32.0f, 32.0f }, LIGHTGRAY); // Draw ground
@@ -119,7 +84,122 @@ DrawTexturePro(*ye,
     }
 
     EndMode3D();
+}
 
+// Handles inputs for fullscreen toggle, pause menu, window exit, etc...
+void custom_keypress_controls(L_KEYPRESSES *lkeys, W_info *w_info) 
+{
+    if (IsKeyPressed(KEY_GRAVE))
+    {
+        lkeys->devconsole = !lkeys->devconsole;
+    }
+    
+    
+    if (!IsWindowFocused())
+    {
+        lkeys->paused = true;
+    }
+    
+    if (IsKeyPressed(KEY_ESCAPE))
+    {
+        lkeys->paused = !lkeys->paused;
+    }
+        
+    if (IsKeyPressed(KEY_F11))
+ 	{
+        if (!lkeys->borderless)
+        {
+            // SetWindowSize(GetMonitorWidth(GetCurrentMonitor()),GetMonitorHeight(GetCurrentMonitor()));
+                SetWindowSize(GetMonitorWidth(GetCurrentMonitor())-1, GetMonitorHeight(GetCurrentMonitor())-1);
+                SetWindowPosition(0,0);
+                lkeys->borderless = !lkeys->borderless;
+            } else {
+                SetWindowSize(w_info->width, w_info->height);
+                lkeys->borderless = !lkeys->borderless;
+            }
+ 		}
+}
+
+void Game(Camera *camera, DevConsole *cons, L_KEYPRESSES *lkeys, int *cameraMode, Texture2D *ye, Mesh mesh, Model model, Color* mapPixels, Vector3 positions[MAX_COLUMNS], Color colors[MAX_COLUMNS], float heights[MAX_COLUMNS])
+{
+    // Define the target update rate for the camera (60 times per second)
+    const double targetUpdateRate = 1.0 / 60.0;
+    static double timeAccumulator = 0.0;
+
+    // Accumulate time
+    timeAccumulator += GetFrameTime();
+
+    if (lkeys->cursorEnabled)
+    {
+        DisableCursor();
+        lkeys->cursorEnabled = false;
+    }
+    BeginDrawing();
+    ClearBackground(RAYWHITE);
+    render_3d(camera, ye, positions, colors, heights, cameraMode);
+
+    if (lkeys->devconsole)
+    {
+        DrawRectangle(4,GetScreenHeight()-4-24, 400, 24, SKYBLUE);
+        DrawRectangleLines(3,GetScreenHeight()-5-24, 402, 26, BLACK);
+        DrawText(TextFormat("%s", cons->text), 6, GetScreenHeight()-3-22, 22, RED);
+        int key = GetKeyPressed();
+        if (key > 0 && cons->index < 63 && cons->index >= 0)
+        {
+            if ((key >= KEY_APOSTROPHE && key <= 90) || key == KEY_SPACE)
+            {
+                cons->text[cons->index] = (char)key;
+                cons->text[cons->index+1] = '\0';
+                cons->index++;
+                
+            } else if (key == KEY_BACKSPACE && cons->index > 0)
+            {
+                cons->text[--cons->index] = '\0';
+                
+            }
+            
+        }
+        
+        
+    } else if (strcmp(cons->text, "") != 0)
+    {
+        memset(&cons->text, 0, 256);
+        cons->text[0] = '\0';
+        cons->index = 0;
+    }
+    
+    
+    
+
+    // Check if it's time to update the camera
+    while (timeAccumulator >= targetUpdateRate)
+    {
+        // Reset the time accumulator
+        timeAccumulator -= targetUpdateRate;
+        
+        UpdateCameraPro(camera,
+            (Vector3){
+                (IsKeyDown(KEY_W) || IsKeyDown(KEY_UP)) * 0.1f -      // Move forward-backward
+                (IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN)) * 0.1f,
+                (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) * 0.1f -   // Move right-left
+                (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT)) * 0.1f,
+                0.0f                                                // Move up-down
+            },
+            (Vector3){0},
+            0);                              // Move to target (zoom)
+    }
+    UpdateCameraPro(camera,
+            (Vector3){0},
+            (Vector3){
+                GetMouseDelta().x * 0.05f,                            // Rotation: yaw
+                GetMouseDelta().y * 0.05f,                            // Rotation: pitch
+                0.0f                                                // Rotation: roll
+            },
+            GetMouseWheelMove() * 2.0f);  
+
+    // Draw
+    //----------------------------------------------------------------------------------
+    // render_3d(camera, ye, positions, colors, heights, cameraMode);
     // Draw info boxes
     DrawRectangle(5, 5, 330, 100, Fade(SKYBLUE, 0.5f));
     DrawRectangleLines(5, 5, 330, 100, BLUE);
@@ -134,6 +214,7 @@ DrawTexturePro(*ye,
 
     DrawRectangle(600, 5, 195, 100, Fade(SKYBLUE, 0.5f));
     DrawRectangleLines(600, 5, 195, 100, BLUE);
+    
 
     DrawText("Camera status:", 610, 15, 10, BLACK);
     DrawText(TextFormat("- Mode: %s", (*cameraMode == CAMERA_FREE) ? "FREE" :
@@ -163,15 +244,18 @@ int main(void)
         .width = 1366,
         .height = 768
     };
-    SetConfigFlags(FLAG_MSAA_4X_HINT|FLAG_WINDOW_UNDECORATED);
+    // SetConfigFlags(FLAG_MSAA_4X_HINT|FLAG_WINDOW_UNDECORATED);
     
     InitWindow(w_info.width,w_info.height, "OpenGL Window");
     SetExitKey(KEY_NULL);
+    DevConsole cons = { .text = "", .index = 0 };
     L_KEYPRESSES lkeys = {
         .exitWindow = false,
         .borderless = false,
-        .paused = false
-    }; // struct with all values for handling custom window events
+        .paused = false,
+        .cursorEnabled = true,
+        .devconsole = false
+    };
     Image yeImg = LoadImage("ye.png");
     if (!IsImageReady(yeImg))
     {
@@ -209,27 +293,30 @@ int main(void)
         colors[i] = (Color){ GetRandomValue(0, 255), GetRandomValue(0, 255), GetRandomValue(0,255), GetRandomValue(0,255) };
     }
 
-    DisableCursor();                    // Limit cursor to relative movement inside the window
+    DisableCursor();
+    lkeys.cursorEnabled = false;
 
-    SetTargetFPS(0);                   // Set our game to run at 60 frames-per-second
-    //--------------------------------------------------------------------------------------
+    SetTargetFPS(0);
 
     // Main game loop
     while (!lkeys.exitWindow)
     {
         custom_keypress_controls(&lkeys, &w_info);
         if (!lkeys.paused) {
-            Game(&camera, heights, positions, colors, &cameraMode, &ye, mesh, model, mapPixels);
+            Game(&camera, &cons, &lkeys, &cameraMode, &ye, mesh, model, mapPixels, positions, colors, heights);
         } 
         if (lkeys.paused) {
-            BeginDrawing();
-            EndDrawing();
+            pauseMenu(&camera, &lkeys, &ye, positions, colors, heights, &cameraMode);
         }
         
         if ((IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_Q)) || WindowShouldClose()) lkeys.exitWindow = true;
         
     }
-    EnableCursor();
+    if (lkeys.cursorEnabled == false)
+    {
+        EnableCursor();
+        lkeys.cursorEnabled = true;
+    }
 
     // De-Initialization
     //--------------------------------------------------------------------------------------

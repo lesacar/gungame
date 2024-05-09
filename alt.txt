@@ -1,0 +1,1 @@
+clang -target x86_64-pc-win32-gnu -L /usr/lib/gcc/x86_64-w64-mingw32/10-posix/ -std=c11 -I./static/windows/include/ -Wall -O3 src/main.c -o build/app.exe  -L./static/windows -lraylib -lm -lopengl32 -lgdi32 -lwinmm -static

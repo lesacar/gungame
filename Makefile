@@ -34,16 +34,16 @@ check: $(TARGET)
 clean:
 	$(RM) -rf $(BUILD_DIR) $(OBJ_DIR) windows_obj
 
-win: CC = x86_64-w64-mingw32-gcc -D WIN32 -D WINDBG
-win: CFLAGS += -g
-win: LDFLAGS = -L./static/windows -lraylib -lm -lopengl32 -lgdi32 -lwinmm -static
+win: CC = x86_64-w64-mingw32-gcc -std=c11
+win: CFLAGS += -march=native
+win: LDFLAGS = -L /usr/lib/gcc/x86_64-w64-mingw32/10-posix/ -L ./static/windows -lraylib -lm -lopengl32 -lgdi32 -lwinmm -static
 win: INCLUDE = -I./static/windows/include/
 win: TARGET = $(BUILD_DIR)/main.exe
 win: OBJ = $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SRC))
 win: $(TARGET)
 
 winrel: CFLAGS += -O3 -D WINREL
-winrel: clean
+# winrel: clean
 winrel: win
 
 debug: CFLAGS += -g -D UDEBUG
