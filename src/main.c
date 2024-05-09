@@ -142,8 +142,8 @@ void Game(Camera *camera, DevConsole *cons, L_KEYPRESSES *lkeys, int *cameraMode
     {
         DrawRectangle(4,GetScreenHeight()-4-24, 400, 24, (Color){0,0,0,200});
         // DrawRectangleLines(3,GetScreenHeight()-5-24, 402, 25, BLACK);
-		float conslinewidth = 5.0f;
-		DrawRectangleLinesEx((Rectangle){3+(-1*(int)conslinewidth+1),GetScreenHeight()-5-24+(-1*(int)conslinewidth+1), 402+((int)conslinewidth), 25+((int)conslinewidth)}, conslinewidth, BLACK);
+		float conslinewidth = 1.0f;
+		DrawRectangleLinesEx((Rectangle){3+(-1*(int)conslinewidth+1),GetScreenHeight()-5-24+(-1*(int)conslinewidth+1), 401+((int)conslinewidth), 25+((int)conslinewidth)}, conslinewidth, BLACK);
         DrawText(TextFormat("%s", cons->text), 6, GetScreenHeight()-3-22, 22, WHITE);
         int key = GetKeyPressed();
         if (key > 0 && cons->index < 63 && cons->index >= 0)
